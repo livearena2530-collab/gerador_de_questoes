@@ -240,6 +240,50 @@
                         <option value="IDECAN">IDECAN</option>
                     </select>
                     
+                    <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Qual Concurso? (Órgão / Cargo Alvo)</label>
+                    <select id="ia-orgao" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 border-indigo-400 dark:border-indigo-500 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white mb-4">
+                        <option value="">Qualquer Concurso (Geral)</option>
+                        <optgroup label="🎓 Carreiras Educacionais">
+                            <option value="SEDUC-PA - Professor">SEDUC-PA - Professor</option>
+                            <option value="SEDUC-PA - Especialista em Educação">SEDUC-PA - Especialista em Educação</option>
+                            <option value="SEDUC-PA - Assistente Administrativo">SEDUC-PA - Assistente Administrativo</option>
+                            <option value="SEMEC - Professor / Pedagogo">SEMEC - Professor / Pedagogo</option>
+                            <option value="Universidades Federais (TAE)">Universidades Federais (TAE)</option>
+                        </optgroup>
+                        <optgroup label="🚓 Segurança Pública">
+                            <option value="Polícia Civil (PC-PA) - Investigador">Polícia Civil (PC-PA) - Investigador</option>
+                            <option value="Polícia Civil (PC-PA) - Escrivão">Polícia Civil (PC-PA) - Escrivão</option>
+                            <option value="Polícia Civil (PC-PA) - Papiloscopista">Polícia Civil (PC-PA) - Papiloscopista</option>
+                            <option value="Polícia Civil (PC-PA) - Delegado">Polícia Civil (PC-PA) - Delegado</option>
+                            <option value="Polícia Militar (PM-PA) - Soldado">Polícia Militar (PM-PA) - Soldado</option>
+                            <option value="Polícia Militar (PM-PA) - Oficial">Polícia Militar (PM-PA) - Oficial</option>
+                            <option value="Polícia Penal (SEAP-PA)">Polícia Penal (SEAP-PA)</option>
+                            <option value="Polícia Federal (PF)">Polícia Federal (PF)</option>
+                            <option value="Polícia Rodoviária Federal (PRF)">Polícia Rodoviária Federal (PRF)</option>
+                            <option value="Corpo de Bombeiros (CBMPA)">Corpo de Bombeiros (CBMPA)</option>
+                        </optgroup>
+                        <optgroup label="⚖️ Tribunais e Jurídicas">
+                            <option value="Tribunal de Justiça (TJ-PA)">Tribunal de Justiça (TJ-PA)</option>
+                            <option value="Justiça Eleitoral (TRE / TSE Unificado)">Justiça Eleitoral (TRE / TSE Unificado)</option>
+                            <option value="Tribunal Regional do Trabalho (TRT)">Tribunal Regional do Trabalho (TRT)</option>
+                            <option value="Tribunal Regional Federal (TRF)">Tribunal Regional Federal (TRF)</option>
+                            <option value="Ministério Público (MP-PA / MPU)">Ministério Público (MP-PA / MPU)</option>
+                            <option value="Defensoria Pública (DPE-PA)">Defensoria Pública (DPE-PA)</option>
+                        </optgroup>
+                        <optgroup label="🏢 Administrativas, Fiscais e Controle">
+                            <option value="INSS - Técnico / Analista">INSS - Técnico / Analista</option>
+                            <option value="SEFA-PA (Auditor / Fiscal)">SEFA-PA (Auditor / Fiscal)</option>
+                            <option value="TCE-PA (Tribunal de Contas)">TCE-PA (Tribunal de Contas)</option>
+                            <option value="Banco do Brasil / Caixa Econômica">Banco do Brasil / Caixa Econômica</option>
+                            <option value="Correios">Correios</option>
+                            <option value="Assembleia Legislativa (ALEPA)">Assembleia Legislativa (ALEPA)</option>
+                        </optgroup>
+                        <optgroup label="🏥 Carreiras da Saúde">
+                            <option value="Secretaria de Saúde (SESPA)">Secretaria de Saúde (SESPA)</option>
+                            <option value="Hospitais Universitários (EBSERH)">Hospitais Universitários (EBSERH)</option>
+                        </optgroup>
+                    </select>
+
                     <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Filtro Cirúrgico (Subtópico)</label>
                     <input type="text" id="ia-topico" placeholder="Ex: Habeas Corpus, Crase..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 dark:text-white mb-6">
 
@@ -263,6 +307,54 @@
                         <option value="ineditas">Questões Inéditas (Criadas pela IA)</option>
                     </select>
                     
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Banca Específica</label>
+                            <select id="sim-banca" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 outline-none focus:border-indigo-500 dark:text-white">
+                                <option value="">Qualquer Banca</option>
+                                <option value="CEBRASPE (CESPE)">CEBRASPE</option>
+                                <option value="FGV">FGV</option>
+                                <option value="VUNESP">VUNESP</option>
+                                <option value="FCC">FCC</option>
+                                <option value="Cesgranrio">Cesgranrio</option>
+                                <option value="Instituto AOCP">AOCP</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Qual Concurso?</label>
+                            <select id="sim-orgao" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 border-indigo-400 dark:border-indigo-500 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white">
+                                <option value="">Qualquer Concurso (Geral)</option>
+                                <optgroup label="🎓 Carreiras Educacionais">
+                                    <option value="SEDUC-PA - Professor">SEDUC-PA - Professor</option>
+                                    <option value="SEDUC-PA - Especialista em Educação">SEDUC-PA - Especialista em Educação</option>
+                                    <option value="SEDUC-PA - Assistente Administrativo">SEDUC-PA - Assistente Administrativo</option>
+                                    <option value="SEMEC - Professor / Pedagogo">SEMEC - Professor / Pedagogo</option>
+                                </optgroup>
+                                <optgroup label="🚓 Segurança Pública">
+                                    <option value="Polícia Civil (PC-PA) - Investigador">Polícia Civil (PC-PA) - Investigador</option>
+                                    <option value="Polícia Civil (PC-PA) - Escrivão">Polícia Civil (PC-PA) - Escrivão</option>
+                                    <option value="Polícia Civil (PC-PA) - Papiloscopista">Polícia Civil (PC-PA) - Papiloscopista</option>
+                                    <option value="Polícia Militar (PM-PA)">Polícia Militar (PM-PA)</option>
+                                    <option value="Polícia Penal (SEAP-PA)">Polícia Penal (SEAP-PA)</option>
+                                    <option value="Polícia Federal (PF)">Polícia Federal (PF)</option>
+                                    <option value="Polícia Rodoviária Federal (PRF)">Polícia Rodoviária Federal (PRF)</option>
+                                </optgroup>
+                                <optgroup label="⚖️ Tribunais e Jurídicas">
+                                    <option value="Tribunal de Justiça (TJ-PA)">Tribunal de Justiça (TJ-PA)</option>
+                                    <option value="Justiça Eleitoral (TRE / TSE Unificado)">Justiça Eleitoral (TRE / TSE Unificado)</option>
+                                    <option value="Tribunal Regional do Trabalho (TRT)">Tribunal Regional do Trabalho (TRT)</option>
+                                    <option value="Ministério Público (MP-PA / MPU)">Ministério Público (MP-PA / MPU)</option>
+                                </optgroup>
+                                <optgroup label="🏢 Administrativas, Fiscais e Bancárias">
+                                    <option value="INSS - Técnico / Analista">INSS - Técnico / Analista</option>
+                                    <option value="SEFA-PA (Auditor / Fiscal)">SEFA-PA (Auditor / Fiscal)</option>
+                                    <option value="Banco do Brasil / Caixa Econômica">Banco do Brasil / Caixa Econômica</option>
+                                    <option value="Correios">Correios</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-2 gap-3 mb-6">
                         <div>
                             <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Nível</label>
@@ -406,7 +498,7 @@
             fecharModal('modal-ia'); showLoading(true);
             await api('/api/gerar', 'POST', {
                 disciplina_id: parseInt(id), nivel: document.getElementById('ia-nivel').value, quantidade: parseInt(document.getElementById('ia-qtd').value),
-                banca: document.getElementById('ia-banca').value, topico: document.getElementById('ia-topico').value, tipo: document.getElementById('ia-tipo').value 
+                banca: document.getElementById('ia-banca').value, orgao: document.getElementById('ia-orgao').value, topico: document.getElementById('ia-topico').value, tipo: document.getElementById('ia-tipo').value 
             });
             showLoading(false); carregarMateria(parseInt(id));
         }
@@ -416,7 +508,7 @@
             const pressaoVal = parseInt(document.getElementById('sim-pressao').value);
             
             await api('/api/gerar_simulado', 'POST', {
-                nivel: document.getElementById('sim-nivel').value, quantidade: parseInt(document.getElementById('sim-qtd').value), tipo: document.getElementById('sim-tipo').value 
+                nivel: document.getElementById('sim-nivel').value, quantidade: parseInt(document.getElementById('sim-qtd').value), banca: document.getElementById('sim-banca').value, orgao: document.getElementById('sim-orgao').value, tipo: document.getElementById('sim-tipo').value 
             });
             showLoading(false); 
             
