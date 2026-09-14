@@ -5,13 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ProEstudos - Concursos 2.0</title>
     
-    <!-- 👇 Configuração PWA (Obrigatória para aparecer o botão Instalar) -->
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#4f46e5">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="ProEstudos">
-    
     <!-- 👇 Ícone da aba do navegador (Favicon de Chapéu de Formatura) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
     
@@ -84,6 +77,7 @@
             }
             [id^="card_questao_"] p { font-size: 11pt !important; line-height: 1.4 !important; text-align: justify !important; margin-bottom: 15px !important; }
             
+            /* A mágica do layout limpo e junto nas alternativas */
             [id^="alts_"] { margin-bottom: 5px !important; }
             [id^="alts_"] button { 
                 border: none !important; margin-bottom: 6px !important; padding: 0 !important; 
@@ -114,6 +108,7 @@
                     <p class="text-[10px] uppercase font-bold text-indigo-500 tracking-wider">Concursos 2.0</p>
                 </div>
             </div>
+            <!-- Botão de fechar só aparece no celular -->
             <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-slate-700 dark:hover:text-white p-2">
                 <i class="ph-bold ph-x text-xl"></i>
             </button>
@@ -421,6 +416,7 @@
     </div>
 
     <script>
+        // 👇 AQUI FOI FEITA A ALTERAÇÃO: Este é o link oficial do seu servidor gerado pelo Render!
         const API_BASE_URL = 'https://proestudos-api.onrender.com'; 
         
         let state = {
@@ -523,6 +519,7 @@
             }
         }
 
+        // --- MODO PRESSÃO ---
         function iniciarModoPressao(segundos) {
             state.modoPressao = true;
             state.respostasPressao = {};
@@ -560,6 +557,7 @@
             carregarPainel();
         }
 
+        // --- CADERNO DE ERROS ---
         async function iniciarCadernoDeErros() {
             fecharSidebarMobile();
             state.isCadernoErros = true;
@@ -598,6 +596,7 @@
             document.getElementById('conteudo-principal').innerHTML = html;
         }
 
+        // --- FUNCIONALIDADES DE QUESTÃO ---
         function lerQuestao(btn, qId) {
             const q = state.questoes.find(x => x.id === qId); if (!q) return;
             window.speechSynthesis.cancel();
@@ -654,6 +653,7 @@
             }
         }
 
+        // --- RENDERIZAÇÃO CENTRAL ---
         async function init() {
             const data = await api('/api/dados');
             if(!data) return;
@@ -895,7 +895,7 @@
                             </div>` : ''
                         }
                     </div>
-                `;
+                </div>`;
             }).join('') + `<div class="text-center py-6 text-slate-400 font-bold text-sm no-print">Fim da lista</div>`;
         }
 
@@ -973,15 +973,6 @@
             }
             else if(state.disciplinaAtual) carregarMateria(state.disciplinaAtual);
             else carregarPainel();
-        }
-
-        // 👇 Ativando o motor do Aplicativo (PWA) no celular
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').then(reg => {
-                    console.log('App PWA registrado e pronto para instalar!');
-                }).catch(err => console.log('PWA Error:', err));
-            });
         }
 
         init();
