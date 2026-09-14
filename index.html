@@ -5,9 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ProEstudos - Concursos 2.0</title>
     
-    <!-- 👇 PWA (App Instalável) -->
+    <!-- 👇 Configuração PWA (Obrigatória para aparecer o botão Instalar) -->
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#0f172a">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ProEstudos">
     
     <!-- 👇 Ícone da aba do navegador (Favicon de Chapéu de Formatura) -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
@@ -892,7 +895,7 @@
                             </div>` : ''
                         }
                     </div>
-                </div>`;
+                `;
             }).join('') + `<div class="text-center py-6 text-slate-400 font-bold text-sm no-print">Fim da lista</div>`;
         }
 
