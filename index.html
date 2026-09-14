@@ -1,438 +1,537 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="light">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProEstudos - Concursos</title>
     
-    <!-- PWA META TAGS MÁGICAS (Faz o navegador sugerir a instalação) -->
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- PWA -->
+    <link rel="manifest" href="https://proestudos-api.onrender.com/manifest.json">
     <meta name="theme-color" content="#0f172a">
     
-    <title>ProEstudos - Concursos 4.0</title>
-    
-    <!-- 🔗 Link para o Manifest (Gerado via JS dinâmico abaixo) -->
-    <link id="pwa-manifest" rel="manifest" href="">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>">
-    
+    <!-- Dependências -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    
-    <script>
-        // Mágica PWA: Gerando o Manifest.json diretamente pelo Frontend sem precisar de arquivo novo
-        const manifestData = {
-            "name": "ProEstudos 4.0",
-            "short_name": "ProEstudos",
-            "start_url": ".",
-            "display": "standalone",
-            "background_color": "#0f172a",
-            "theme_color": "#4f46e5",
-            "description": "Plataforma de IA para Concursos",
-            "icons": [
-                {
-                    "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎓</text></svg>",
-                    "sizes": "192x192 512x512",
-                    "type": "image/svg+xml"
-                }
-            ]
-        };
-        const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
-        document.getElementById('pwa-manifest').setAttribute('href', URL.createObjectURL(manifestBlob));
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-        // Mágica PWA: Gerando o Service Worker (Faz o celular aceitar a instalação)
-        const swCode = `
-            self.addEventListener('install', (e) => { self.skipWaiting(); });
-            self.addEventListener('activate', (e) => { e.waitUntil(clients.claim()); });
-            self.addEventListener('fetch', (e) => {});
-        `;
-        const swBlob = new Blob([swCode], { type: 'application/javascript' });
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(err => console.log('SW ERRO:', err));
-        }
-
-        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } };
-    </script>
-    
     <style>
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .dark ::-webkit-scrollbar-thumb { background: #475569; }
-
-        .perfil-card { transition: all 0.2s ease; }
-        .perfil-card:hover { transform: scale(1.05); }
-        .perfil-card:hover .perfil-avatar { border: 3px solid white; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5); }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0b0f19; color: #e2e8f0; }
         
-        .ai-brain { background: linear-gradient(135deg, #4f46e5, #ec4899); background-clip: text; -webkit-background-clip: text; color: transparent; }
-        mark { background-color: #fde047; color: #0f172a; border-radius: 4px; padding: 0 4px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        /* Tela de Perfis (Netflix Style) */
+        #perfil-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #141414; z-index: 100;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .profile-card {
+            width: 150px; height: 150px; border-radius: 10px; cursor: pointer;
+            transition: all 0.2s ease-in-out; border: 4px solid transparent;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 4rem; color: white;
+        }
+        .profile-card:hover { border-color: white; transform: scale(1.05); }
+        .profile-name { text-align: center; margin-top: 10px; color: #808080; font-weight: bold; transition: color 0.2s; }
+        .profile-wrapper:hover .profile-name { color: white; }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-200 font-sans h-[100dvh] flex overflow-hidden">
+<body class="h-screen overflow-hidden flex">
 
-    <!-- 🍿 TELA DE PERFIS (ESTILO NETFLIX) -->
-    <div id="tela-perfis" class="fixed inset-0 bg-[#141414] z-[100] flex flex-col items-center justify-center text-white p-4">
-        <h1 class="text-3xl md:text-5xl font-black mb-12 tracking-tight text-center">Quem está estudando?</h1>
-        
-        <div id="lista-perfis-netflix" class="flex flex-wrap justify-center gap-6 md:gap-8 max-w-4xl mx-auto">
-            <!-- Perfis serão injetados aqui -->
+    <!-- TELA DE PERFIS -->
+    <div id="perfil-screen">
+        <h1 class="text-4xl md:text-5xl font-bold text-white mb-10 tracking-wide">Quem está estudando?</h1>
+        <div class="flex flex-wrap justify-center gap-8 px-4" id="perfis-container">
+            <!-- Perfis injetados aqui -->
+            <div class="profile-wrapper flex flex-col items-center cursor-pointer" onclick="criarNovoPerfil()">
+                <div class="profile-card border-slate-700 hover:border-white border-2 border-dashed bg-transparent hover:bg-slate-800">
+                    <i class="ph ph-plus text-slate-500"></i>
+                </div>
+                <span class="profile-name">Adicionar Perfil</span>
+            </div>
         </div>
-
-        <button onclick="abrirModalNovoPerfil()" class="mt-12 px-6 py-3 border border-slate-600 text-slate-400 font-bold hover:text-white hover:border-white transition uppercase tracking-widest text-sm">
-            Gerenciar Perfis
-        </button>
     </div>
 
-    <!-- TELA PRINCIPAL (APP) -->
-    <div id="overlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/60 dark:bg-black/80 z-30 hidden md:hidden backdrop-blur-sm transition-opacity"></div>
-
-    <aside id="sidebar" class="w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col fixed md:relative h-[100dvh] z-40 transform -translate-x-full md:translate-x-0 transition-transform duration-300 shrink-0">
-        <div class="p-6 border-b border-slate-200 dark:border-slate-800 shrink-0 flex justify-between items-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition" onclick="voltarParaPerfis()">
-            <div class="flex items-center gap-3">
-                <div id="sidebar-avatar-bg" class="w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-lg shrink-0 border-2 border-white/20">
-                    <i id="sidebar-avatar-icon" class="ph-bold text-2xl"></i>
-                </div>
-                <div class="min-w-0">
-                    <h1 id="sidebar-nome" class="text-lg font-black tracking-tight text-slate-900 dark:text-white truncate">ProEstudos</h1>
-                    <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Trocar Perfil <i class="ph-bold ph-arrows-left-right"></i></p>
+    <!-- SIDEBAR -->
+    <aside class="w-72 bg-[#0f172a] border-r border-slate-800 flex flex-col hidden md:flex h-full">
+        <div class="p-6 border-b border-slate-800">
+            <div class="flex items-center gap-3 text-indigo-500">
+                <i class="ph-fill ph-student text-3xl"></i>
+                <div>
+                    <h1 class="text-xl font-extrabold text-white tracking-tight">ProEstudos</h1>
+                    <span class="text-[10px] uppercase font-bold tracking-widest text-indigo-400">Concursos 4.0</span>
                 </div>
             </div>
         </div>
 
-        <div class="flex-1 overflow-y-auto p-4 space-y-1" id="menu-disciplinas">
-            <button onclick="carregarPainel()" class="w-full flex items-center gap-3 px-4 py-3 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-400 font-bold rounded-xl transition-colors">
-                <i class="ph-bold ph-chart-pie-slice text-xl"></i> Dashboards
-            </button>
-            <button onclick="iniciarCadernoDeErros()" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-rose-50 dark:hover:bg-rose-900/20 text-slate-700 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 font-bold rounded-xl transition-colors mt-2 border border-slate-200 dark:border-slate-800 hover:border-rose-200 dark:hover:border-rose-800">
-                <i class="ph-bold ph-book-open text-xl text-rose-500"></i> Caderno de Erros
-            </button>
-            <div class="pt-4 pb-2 px-2 text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider flex justify-between items-center">
-                <span>Disciplinas</span>
-                <button onclick="abrirModalNovaDisciplina()" class="hover:text-indigo-600 transition" title="Adicionar Disciplina"><i class="ph-bold ph-plus text-lg"></i></button>
+        <div class="p-4 flex-1 overflow-y-auto custom-scrollbar">
+            <div class="flex items-center justify-between mb-4 px-2">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Disciplinas</span>
+                <button onclick="abrirModal('modal-disciplina')" class="text-indigo-400 hover:text-indigo-300">
+                    <i class="ph ph-plus-circle text-lg"></i>
+                </button>
             </div>
-            <div id="lista-disciplinas-menu" class="space-y-1"></div>
+            <ul id="lista-materias" class="space-y-1"></ul>
         </div>
-
-        <div class="p-4 border-t border-slate-200 dark:border-slate-800 space-y-2 shrink-0 bg-white dark:bg-slate-900">
-            <button onclick="abrirModalIA()" class="w-full flex items-center justify-center gap-2 px-4 py-3.5 bg-slate-900 dark:bg-indigo-600 text-white font-bold rounded-xl hover:bg-slate-800 transition shadow-md active:scale-[0.98]">
-                <i class="ph-fill ph-magic-wand text-xl text-yellow-400"></i> Gerar via IA
+        
+        <div class="p-4 border-t border-slate-800 space-y-3">
+            <button onclick="abrirModal('modal-ia')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2">
+                <i class="ph-fill ph-magic-wand"></i> Gerador Avançado
             </button>
-            <button onclick="abrirModalConfig()" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold rounded-xl hover:bg-slate-200 transition">
-                <i class="ph-bold ph-gear"></i> Config
+            <button onclick="logoutPerfil()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
+                <i class="ph ph-users"></i> Trocar Perfil
             </button>
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col h-[100dvh] min-w-0 overflow-hidden relative">
-        <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 py-3 flex items-center justify-between sticky top-0 z-20 shrink-0 shadow-sm">
-            <div class="flex items-center gap-3 min-w-0 flex-1 pr-2">
-                <button onclick="toggleSidebar()" class="md:hidden w-10 h-10 flex items-center justify-center text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 rounded-xl"><i class="ph-bold ph-list text-2xl"></i></button>
-                <h2 id="header-title" class="text-lg md:text-xl font-black truncate dark:text-white">Painel Geral</h2>
-            </div>
-            <div class="flex items-center gap-2 shrink-0">
-                <div class="flex items-center gap-1.5 bg-gradient-to-r from-orange-500 to-amber-500 text-white px-3 py-2 rounded-xl shadow-md font-bold text-sm shrink-0">
-                    <i class="ph-fill ph-fire text-lg animate-pulse"></i>
-                    <span id="streak-counter" class="hidden sm:inline">0 dias</span>
+    <!-- ÁREA PRINCIPAL -->
+    <main class="flex-1 flex flex-col h-full bg-[#0b0f19]">
+        <header class="h-20 bg-[#0f172a]/80 backdrop-blur-md border-b border-slate-800 px-8 flex items-center justify-between sticky top-0 z-10">
+            <h2 id="titulo-materia" class="text-2xl font-bold text-white">Dashboards de Desempenho</h2>
+            <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2 bg-slate-800/50 px-4 py-2 rounded-full border border-slate-700">
+                    <div id="perfil-avatar-atual" class="w-6 h-6 rounded-full bg-indigo-500 flex items-center justify-center text-xs font-bold"></div>
+                    <span id="perfil-nome-atual" class="text-sm font-bold text-slate-300">...</span>
                 </div>
             </div>
         </header>
 
-        <div id="barra-pressao" class="hidden bg-slate-900 text-white p-3 flex justify-between items-center shadow-lg z-10 shrink-0 border-b-4 border-rose-500">
-            <div class="flex items-center gap-2 font-black text-rose-400 animate-pulse"><i class="ph-fill ph-timer text-2xl"></i> <span id="timer-display" class="text-xl">00:00:00</span></div>
-            <button onclick="finalizarModoPressao()" class="bg-rose-500 hover:bg-rose-600 px-4 py-2 rounded-xl font-bold">Finalizar</button>
-        </div>
+        <div class="flex-1 overflow-y-auto custom-scrollbar p-8">
+            <div class="max-w-6xl mx-auto space-y-8">
+                
+                <!-- CARDS DE ESTATÍSTICA -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-[#111827] border border-slate-800 p-6 rounded-2xl shadow-xl flex flex-col items-center justify-center">
+                        <span class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">Total Resolvidas</span>
+                        <span id="stat-total" class="text-5xl font-black text-white">0</span>
+                    </div>
+                    <div class="bg-[#111827] border border-emerald-900/30 p-6 rounded-2xl shadow-xl flex flex-col items-center justify-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-emerald-500/5"></div>
+                        <span class="text-xs font-bold text-emerald-500 uppercase tracking-widest mb-2 relative">Acertos</span>
+                        <span id="stat-acertos" class="text-5xl font-black text-emerald-400 relative">0</span>
+                    </div>
+                    <div class="bg-[#111827] border border-rose-900/30 p-6 rounded-2xl shadow-xl flex flex-col items-center justify-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-rose-500/5"></div>
+                        <span class="text-xs font-bold text-rose-500 uppercase tracking-widest mb-2 relative">Erros</span>
+                        <span id="stat-erros" class="text-5xl font-black text-rose-400 relative">0</span>
+                    </div>
+                </div>
 
-        <div class="flex-1 overflow-y-auto p-4 md:p-8" id="main-scroll">
-            <div class="max-w-4xl mx-auto" id="conteudo-principal"></div>
-        </div>
-        
-        <div id="loading-ia" class="hidden absolute inset-0 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md z-50 flex flex-col items-center justify-center">
-            <i class="ph-fill ph-brain text-7xl ai-brain animate-pulse mb-6"></i>
-            <h3 class="text-2xl font-black text-slate-900 dark:text-white mb-2">Trabalhando...</h3>
-            <p class="text-slate-500 font-medium text-center">Conectando ao modelo de Inteligência Artificial.</p>
+                <!-- GRÁFICOS (Com correção de altura para evitar loop infinito) -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-[#111827] border border-slate-800 p-6 rounded-2xl shadow-xl">
+                        <h3 class="text-sm font-bold text-slate-300 flex items-center gap-2 mb-6 uppercase tracking-wider">
+                            <i class="ph-bold ph-trend-up text-indigo-500"></i> Evolução de Estudos (7 Dias)
+                        </h3>
+                        <div class="relative w-full h-[220px]">
+                            <canvas id="graficoEvolucao"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-[#111827] border border-slate-800 p-6 rounded-2xl shadow-xl flex flex-col">
+                        <h3 class="text-sm font-bold text-slate-300 flex items-center gap-2 mb-6 uppercase tracking-wider">
+                            <i class="ph-bold ph-chart-pie-slice text-indigo-500"></i> Balanço Geral
+                        </h3>
+                        <div class="relative w-full h-[220px] flex-1 flex justify-center items-center">
+                            <canvas id="graficoDonut"></canvas>
+                            <div class="absolute inset-0 flex items-center justify-center flex-col pointer-events-none mt-4">
+                                <span id="stat-taxa" class="text-4xl font-black text-white">0%</span>
+                                <span class="text-xs text-slate-500 font-bold uppercase">Taxa de Acerto</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ÁREA DE QUESTÕES -->
+                <div class="pt-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                            <i class="ph-fill ph-stack text-indigo-500"></i> Caderno de Questões
+                        </h3>
+                        <div class="flex gap-2 bg-slate-900 p-1 rounded-lg border border-slate-800">
+                            <button onclick="filtrar('todas')" class="px-4 py-1.5 text-sm font-bold rounded-md bg-indigo-600 text-white">Todas</button>
+                            <button onclick="filtrar('pendentes')" class="px-4 py-1.5 text-sm font-bold rounded-md text-slate-400 hover:text-white">Pendentes</button>
+                        </div>
+                    </div>
+                    
+                    <div id="container-questoes" class="space-y-6">
+                        <div class="text-center py-20 bg-[#111827] rounded-2xl border border-slate-800 border-dashed">
+                            <i class="ph-duotone ph-student text-6xl text-slate-700 mb-4"></i>
+                            <h3 class="text-lg font-bold text-slate-400">Selecione uma disciplina ao lado</h3>
+                            <p class="text-slate-600 text-sm mt-2">Ou gere novas questões usando a Inteligência Artificial.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </main>
 
-    <!-- Modais -->
-    <div id="modal-novo-perfil" class="fixed inset-0 bg-black/90 z-[200] hidden items-center justify-center p-4">
-        <div class="bg-slate-900 rounded-3xl w-full max-w-sm p-8 border border-slate-700 text-center">
-            <h3 class="text-white text-2xl font-black mb-6">Adicionar Perfil</h3>
-            <div class="w-24 h-24 mx-auto bg-slate-800 rounded-xl mb-6 flex items-center justify-center text-4xl text-slate-500" id="preview-avatar">
-                <i class="ph-bold ph-user"></i>
-            </div>
-            <input type="text" id="nome-novo-perfil" placeholder="Nome" class="w-full bg-slate-800 text-white border border-slate-700 rounded-xl px-4 py-3 outline-none text-center font-bold mb-6">
-            <div class="flex gap-2">
-                <button onclick="fecharModal('modal-novo-perfil')" class="flex-1 py-3 text-slate-400 font-bold border border-slate-700 rounded-xl hover:text-white">Cancelar</button>
-                <button onclick="salvarNovoPerfil()" class="flex-1 py-3 bg-white text-black font-black rounded-xl">Salvar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modais Genéricos HTML Omitidos para poupar espaço, mantidos idênticos (modal-ia, config, disciplina) -->
-    <div id="modal-ia" class="fixed inset-0 bg-slate-900/60 z-50 hidden items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-slate-800 flex flex-col max-h-[90dvh]">
-            <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center shrink-0">
-                <h3 class="font-extrabold text-lg flex items-center gap-2 dark:text-white"><i class="ph-fill ph-magic-wand text-indigo-500"></i> Gerador IA</h3>
-                <button onclick="fecharModal('modal-ia')" class="text-slate-400 p-2"><i class="ph-bold ph-x text-xl"></i></button>
-            </div>
-            <div class="p-6 space-y-4 overflow-y-auto flex-1">
-                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Disciplina</label>
-                <select id="ia-disciplina" class="w-full bg-slate-50 dark:bg-slate-950 border rounded-xl px-4 py-3 dark:text-white mb-4"></select>
-                
-                <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-1">Concurso / Órgão Alvo</label>
-                <select id="ia-orgao" class="w-full bg-slate-50 dark:bg-slate-950 border border-indigo-400 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white mb-4">
-                    <option value="">Geral</option>
-                    <optgroup label="Carreiras Educacionais">
-                        <option value="SEDUC - Professor">SEDUC - Professor</option>
-                        <option value="SEMEC - Pedagogo">SEMEC - Pedagogo</option>
-                    </optgroup>
-                    <optgroup label="Segurança Pública">
-                        <option value="Polícia Civil (PC)">Polícia Civil (PC)</option>
-                        <option value="Polícia Militar (PM)">Polícia Militar (PM)</option>
-                    </optgroup>
-                    <optgroup label="Tribunais">
-                        <option value="Tribunal de Justiça (TJ)">Tribunal de Justiça (TJ)</option>
-                        <option value="TSE Unificado">TSE Unificado</option>
-                    </optgroup>
-                </select>
-                <button onclick="gerarQuestoes()" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl mt-4">Iniciar Busca</button>
-            </div>
-        </div>
-    </div>
-    
-    <div id="modal-config" class="fixed inset-0 bg-black/80 z-50 hidden items-center justify-center p-4">
-        <div class="bg-slate-900 rounded-3xl w-full max-w-sm p-6 border border-slate-700">
-            <h3 class="text-white font-bold mb-4">Configurações</h3>
-            <button onclick="resetarBanco()" class="w-full py-3 bg-rose-900/30 text-rose-500 font-bold rounded-xl border border-rose-900 mb-3">Zerar Banco de Dados</button>
-            <button onclick="fecharModal('modal-config')" class="w-full py-3 bg-slate-800 text-white font-bold rounded-xl">Voltar</button>
-        </div>
-    </div>
-
-    <script>
-        // O link real do Render
-        const API_BASE_URL = 'https://proestudos-api.onrender.com'; 
-        
-        let state = {
-            perfilId: null, perfilObj: null, perfis: [],
-            disciplinas: [], disciplinaAtual: null, filtroAtual: 'todas', questoes: [], stats: {},
-            modoPressao: false, respostasPressao: {}, tempoRestante: 0, timerInterval: null
-        };
-        let chartEvolucao = null; let chartPizza = null;
-
-        // O SEGREDO DO PWA: Verifica se o tema escuro já está ativado para PWA
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.add('dark'); // Forçando dark mode estilo Netflix
-        }
-
-        async function api(endpoint, method = 'GET', body = null) {
-            try {
-                const options = { method, headers: { 'Content-Type': 'application/json' } };
-                if (body) options.body = JSON.stringify(body);
-                const res = await fetch(`${API_BASE_URL}${endpoint}`, options);
-                if (!res.ok) throw new Error(await res.text());
-                return await res.json();
-            } catch (e) { alert("Servidor offline ou carregando. Tente novamente em alguns segundos."); return null; }
-        }
-
-        function abrirModal(id) { document.getElementById(id).classList.replace('hidden', 'flex'); }
-        function fecharModal(id) { document.getElementById(id).classList.replace('flex', 'hidden'); }
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); document.getElementById('overlay').classList.toggle('hidden'); }
-        
-        // --- LÓGICA DE PERFIS (NETFLIX) ---
-        const listaAvatares = ['ph-student', 'ph-user-astronaut', 'ph-ninja', 'ph-detective', 'ph-alien'];
-        const listaCores = ['bg-rose-500', 'bg-blue-500', 'bg-emerald-500', 'bg-purple-500', 'bg-amber-500'];
-
-        async function initPerfis() {
-            const perfisDB = await api('/api/perfis');
-            state.perfis = perfisDB || [];
-            
-            const salvo = localStorage.getItem('proestudos_perfil');
-            if (salvo && state.perfis.find(p => p.id == salvo)) {
-                entrarNoPerfil(state.perfis.find(p => p.id == salvo));
-            } else {
-                renderizarTelaPerfis();
-            }
-        }
-
-        function renderizarTelaPerfis() {
-            document.getElementById('tela-perfis').classList.remove('hidden');
-            const container = document.getElementById('lista-perfis-netflix');
-            
-            let html = state.perfis.map(p => `
-                <div class="perfil-card cursor-pointer group flex flex-col items-center gap-3 w-28 md:w-36" onclick='entrarNoPerfil(${JSON.stringify(p)})'>
-                    <div class="perfil-avatar w-24 h-24 md:w-36 md:h-36 ${p.cor} rounded-2xl md:rounded-3xl flex items-center justify-center text-white border-4 border-transparent transition-all">
-                        <i class="ph-fill ${p.avatar} text-5xl md:text-7xl"></i>
-                    </div>
-                    <span class="text-slate-400 group-hover:text-white font-bold text-sm md:text-base tracking-wide">${p.nome}</span>
-                </div>
-            `).join('');
-
-            html += `
-                <div class="perfil-card cursor-pointer group flex flex-col items-center gap-3 w-28 md:w-36" onclick="abrirModalNovoPerfil()">
-                    <div class="w-24 h-24 md:w-36 md:h-36 bg-transparent border-2 border-dashed border-slate-600 rounded-2xl md:rounded-3xl flex items-center justify-center text-slate-500 group-hover:border-white group-hover:text-white transition-all">
-                        <i class="ph-bold ph-plus text-5xl md:text-7xl"></i>
-                    </div>
-                    <span class="text-slate-500 group-hover:text-white font-bold text-sm md:text-base tracking-wide">Novo Perfil</span>
-                </div>
-            `;
-            container.innerHTML = html;
-        }
-
-        function abrirModalNovoPerfil() {
-            abrirModal('modal-novo-perfil');
-            const icon = listaAvatares[Math.floor(Math.random() * listaAvatares.length)];
-            const cor = listaCores[Math.floor(Math.random() * listaCores.length)];
-            const preview = document.getElementById('preview-avatar');
-            preview.className = `w-24 h-24 mx-auto rounded-xl mb-6 flex items-center justify-center text-4xl text-white ${cor}`;
-            preview.innerHTML = `<i class="ph-fill ${icon}"></i>`;
-            preview.dataset.icon = icon;
-            preview.dataset.cor = cor;
-        }
-
-        async function salvarNovoPerfil() {
-            const nome = document.getElementById('nome-novo-perfil').value;
-            if(!nome) return;
-            const preview = document.getElementById('preview-avatar');
-            const res = await api('/api/perfis', 'POST', {nome: nome, avatar: preview.dataset.icon, cor: preview.dataset.cor});
-            if(res) {
-                fecharModal('modal-novo-perfil');
-                document.getElementById('nome-novo-perfil').value = '';
-                state.perfis.push(res);
-                entrarNoPerfil(res);
-            }
-        }
-
-        async function entrarNoPerfil(perfil) {
-            state.perfilId = perfil.id;
-            state.perfilObj = perfil;
-            localStorage.setItem('proestudos_perfil', perfil.id);
-            
-            // Atualiza Sidebar
-            document.getElementById('sidebar-avatar-bg').className = `w-10 h-10 rounded-xl flex items-center justify-center text-white shadow-lg shrink-0 border-2 border-white/20 ${perfil.cor}`;
-            document.getElementById('sidebar-avatar-icon').className = `ph-fill ${perfil.avatar} text-2xl`;
-            document.getElementById('sidebar-nome').innerText = perfil.nome;
-
-            document.getElementById('tela-perfis').classList.add('hidden');
-            await initApp();
-        }
-
-        function voltarParaPerfis() {
-            localStorage.removeItem('proestudos_perfil');
-            renderizarTelaPerfis();
-        }
-
-        // --- SISTEMA PRINCIPAL ---
-        async function initApp() {
-            const data = await api(`/api/dados?perfil_id=${state.perfilId}`);
-            if(!data) return;
-            state.disciplinas = data.disciplinas; state.stats = data.stats;
-            document.getElementById('streak-counter').innerText = `${state.stats.streak} dias`;
-            
-            document.getElementById('lista-disciplinas-menu').innerHTML = state.disciplinas.map(d => `
-                <button onclick="carregarMateria(${d.id})" class="w-full text-left px-4 py-2.5 rounded-xl font-bold transition text-slate-400 hover:bg-slate-800">
-                    <span class="truncate">${d.nome}</span>
+    <!-- MODAL IA AVANÇADO -->
+    <div id="modal-ia" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4">
+        <div class="bg-[#111827] w-full max-w-md rounded-2xl border border-slate-800 shadow-2xl flex flex-col max-h-[90vh]">
+            <div class="p-5 border-b border-slate-800 flex justify-between items-center bg-[#111827] rounded-t-2xl">
+                <h3 class="text-xl font-bold text-white flex items-center gap-2">
+                    <i class="ph-fill ph-magic-wand text-indigo-500"></i> Gerador IA
+                </h3>
+                <button onclick="fecharModal('modal-ia')" class="text-slate-400 hover:text-white">
+                    <i class="ph ph-x text-xl"></i>
                 </button>
-            `).join('');
+            </div>
             
-            carregarPainel();
-        }
-
-        async function carregarPainel() {
-            state.disciplinaAtual = null;
-            let query = `/api/questoes?perfil_id=${state.perfilId}&limit=50`;
-            if(state.filtroAtual === 'pendentes') query += `&apenas_pendentes=true`;
-            if(state.filtroAtual === 'erros') query += `&apenas_erros=true`;
-            if(state.filtroAtual === 'acertos') query += `&apenas_acertos=true`;
-            state.questoes = await api(query) || [];
-            const data = await api(`/api/dados?perfil_id=${state.perfilId}`); if(data) state.stats = data.stats;
-            
-            document.getElementById('header-title').innerText = 'Dashboards';
-            document.getElementById('conteudo-principal').innerHTML = `
-                <div class="grid grid-cols-3 gap-3 mb-6">
-                    <div class="bg-slate-900 p-4 rounded-2xl border border-slate-800 flex flex-col items-center justify-center">
-                        <span class="text-slate-400 text-xs font-bold uppercase mb-1">Resolvidas</span>
-                        <span class="text-3xl font-black text-white">${state.stats.total}</span>
-                    </div>
-                    <div class="bg-slate-900 p-4 rounded-2xl border border-emerald-900/50 flex flex-col items-center justify-center">
-                        <span class="text-emerald-500 text-xs font-bold uppercase mb-1">Acertos</span>
-                        <span class="text-3xl font-black text-emerald-400">${state.stats.acertos}</span>
-                    </div>
-                    <div class="bg-slate-900 p-4 rounded-2xl border border-rose-900/50 flex flex-col items-center justify-center">
-                        <span class="text-rose-500 text-xs font-bold uppercase mb-1">Erros</span>
-                        <span class="text-3xl font-black text-rose-400">${state.stats.erros}</span>
-                    </div>
-                </div>
+            <div class="p-6 space-y-4 overflow-y-auto flex-1 custom-scrollbar">
                 
-                <div class="flex gap-2 overflow-x-auto pb-4 mb-4">
-                    <button onclick="setFiltro('todas')" class="px-4 py-2.5 rounded-xl font-bold text-sm bg-indigo-600 text-white shrink-0">Todas</button>
-                    <button onclick="setFiltro('pendentes')" class="px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-800 text-slate-400 shrink-0">Pendentes</button>
+                <!-- Tabs -->
+                <div class="flex bg-slate-900 rounded-lg p-1 mb-2">
+                    <button class="flex-1 py-2 text-sm font-bold text-white bg-slate-700 rounded-md shadow">Foco Específico</button>
+                    <button class="flex-1 py-2 text-sm font-bold text-slate-400 hover:text-white cursor-not-allowed" title="Em breve">Simulado Geral</button>
                 </div>
-                <div id="lista-questoes">${renderListaQuestoes()}</div>
-            `;
-        }
 
-        async function carregarMateria(id) {
-            state.disciplinaAtual = id;
-            let query = `/api/questoes?perfil_id=${state.perfilId}&disciplina_id=${id}&limit=50`;
-            state.questoes = await api(query) || [];
-            const d = state.disciplinas.find(x => x.id === id);
-            document.getElementById('header-title').innerText = d ? d.nome : '';
-            document.getElementById('conteudo-principal').innerHTML = `<div id="lista-questoes">${renderListaQuestoes()}</div>`;
-        }
+                <!-- Origem -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">Origem das Questões</label>
+                    <select id="ia-origem" class="w-full bg-[#0f172a] border border-slate-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-indigo-500">
+                        <option value="Questões REAIS (Provas Anteriores)">Questões REAIS (Provas Anteriores)</option>
+                        <option value="Questões INÉDITAS (Estilo Banca)">Questões INÉDITAS (Estilo Banca)</option>
+                    </select>
+                </div>
 
-        function setFiltro(f) { state.filtroAtual = f; if(state.disciplinaAtual) carregarMateria(state.disciplinaAtual); else carregarPainel(); }
+                <!-- Disciplina -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">Disciplina</label>
+                    <select id="ia-disciplina" class="w-full bg-[#0f172a] border border-slate-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-indigo-500"></select>
+                </div>
 
-        function renderListaQuestoes() {
-            if(state.questoes.length === 0) return `<div class="text-center py-12 text-slate-500">Nenhuma questão aqui.</div>`;
-            return state.questoes.map(q => {
-                return `
-                <div class="bg-slate-900 rounded-3xl border border-slate-800 mb-6 p-6">
-                    <div class="flex gap-2 mb-4"><span class="bg-slate-800 text-indigo-400 text-xs font-bold px-3 py-1 rounded-lg border border-slate-700">${q.disciplina}</span></div>
-                    <p class="text-white font-medium mb-6 whitespace-pre-wrap">${q.enunciado_html || q.enunciado}</p>
-                    <div class="space-y-3">
-                        ${q.alternativas.map(alt => {
-                            const l = alt.charAt(0);
-                            let bg = "bg-slate-800 hover:border-indigo-400 text-slate-300";
-                            if(q.respondida) {
-                                if(l === q.gabarito) bg = "bg-emerald-900/40 border-emerald-500 text-emerald-100";
-                                else if (!q.acertou && l === q.resposta_usuario) bg = "bg-rose-900/40 border-rose-500 text-rose-100";
-                            }
-                            return `<button onclick="selecionarAlt(${q.id}, '${l}')" id="btn_${q.id}_${l}" class="w-full text-left p-4 rounded-xl border border-slate-700 transition ${bg}">${alt}</button>`;
-                        }).join('')}
+                <!-- Nível e Quantidade -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-1">Nível</label>
+                        <select id="ia-nivel" class="w-full bg-[#0f172a] border border-slate-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-indigo-500">
+                            <option value="Médio">Médio</option>
+                            <option value="Superior">Superior</option>
+                        </select>
                     </div>
-                    ${!q.respondida ? `<button onclick="responder(${q.id})" class="w-full py-4 bg-indigo-600 text-white font-bold rounded-xl mt-6">Confirmar Resposta</button>` : `<div class="mt-4 p-4 bg-slate-950 rounded-xl border border-slate-800 text-slate-300 text-sm"><strong>Explicação:</strong> ${q.explicacao}</div>`}
-                </div>`;
-            }).join('');
-        }
+                    <div>
+                        <label class="block text-xs font-bold text-slate-400 mb-1">Quantidade</label>
+                        <select id="ia-quantidade" class="w-full bg-[#0f172a] border border-slate-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-indigo-500">
+                            <option value="5">5 Questões</option>
+                            <option value="10" selected>10 Questões</option>
+                            <option value="20">20 Questões</option>
+                        </select>
+                    </div>
+                </div>
 
-        window.respostasTmp = {};
-        function selecionarAlt(qId, letra) { window.respostasTmp[qId] = letra; document.querySelectorAll(`[id^='btn_${qId}_']`).forEach(b => b.classList.replace('border-indigo-500','border-slate-700')); document.getElementById(`btn_${qId}_${letra}`).classList.replace('border-slate-700','border-indigo-500'); }
+                <!-- Banca -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">Banca Específica</label>
+                    <select id="ia-banca" class="w-full bg-[#0f172a] border border-slate-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-indigo-500">
+                        <option value="Qualquer Banca">Qualquer Banca</option>
+                        <option value="Cebraspe (CESPE)">Cebraspe (CESPE)</option>
+                        <option value="FGV">FGV</option>
+                        <option value="FCC">FCC</option>
+                        <option value="Vunesp">Vunesp</option>
+                        <option value="Quadrix">Quadrix</option>
+                    </select>
+                </div>
+
+                <!-- Concurso -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">Qual Concurso? (Órgão / Cargo Alvo)</label>
+                    <select id="ia-concurso" class="w-full bg-[#0f172a] border border-slate-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-indigo-500">
+                        <option value="Qualquer Concurso">Qualquer Concurso (Geral)</option>
+                        <option value="Polícia Federal (PF)">Polícia Federal (PF)</option>
+                        <option value="Polícia Rodoviária Federal (PRF)">Polícia Rodoviária Federal (PRF)</option>
+                        <option value="Tribunais (TJ, TRT, TRE)">Tribunais (TJ, TRT, TRE)</option>
+                        <option value="Carreiras Administrativas">Carreiras Administrativas</option>
+                        <option value="Carreiras Bancárias (BB, Caixa)">Carreiras Bancárias (BB, Caixa)</option>
+                        <option value="Carreiras Policiais (PC, PM)">Carreiras Policiais (PC, PM)</option>
+                    </select>
+                </div>
+
+                <!-- Filtro Cirúrgico -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 mb-1">Filtro Cirúrgico (Subtópico)</label>
+                    <input type="text" id="ia-filtro" placeholder="Ex: Habeas Corpus, Crase..." class="w-full bg-[#0f172a] border border-slate-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-indigo-500 placeholder-slate-600">
+                </div>
+
+            </div>
+            
+            <div class="p-5 border-t border-slate-800 bg-[#111827] rounded-b-2xl">
+                <button onclick="gerarQuestoes()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2">
+                    <i class="ph-bold ph-check-circle text-xl"></i> Iniciar Busca
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Adicionar Disciplina -->
+    <div id="modal-disciplina" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-[#111827] w-full max-w-sm rounded-2xl border border-slate-800 p-6">
+            <h3 class="text-xl font-bold text-white mb-4">Nova Disciplina</h3>
+            <input type="text" id="nova-disciplina-nome" placeholder="Nome da Matéria" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white mb-4 outline-none focus:border-indigo-500">
+            <div class="flex gap-3">
+                <button onclick="fecharModal('modal-disciplina')" class="flex-1 py-3 font-bold text-slate-400 hover:text-white">Cancelar</button>
+                <button onclick="salvarNovaMateria()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading IA Overlay -->
+    <div id="loading-ia" class="fixed inset-0 bg-black/90 hidden z-[60] flex flex-col items-center justify-center">
+        <div class="w-20 h-20 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-6"></div>
+        <h2 class="text-2xl font-bold text-white mb-2">A IA está trabalhando...</h2>
+        <p class="text-indigo-400 font-medium">Buscando e formatando questões para você</p>
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        // --- COLOQUE O LINK DO SEU RENDER AQUI ---
+        const API_URL = 'https://proestudos-api.onrender.com';
         
-        async function responder(qId) {
-            const resp = window.respostasTmp[qId]; if(!resp) return;
-            await api('/api/responder', 'POST', {questao_id: qId, resposta: resp, perfil_id: state.perfilId});
-            if(state.disciplinaAtual) carregarMateria(state.disciplinaAtual); else carregarPainel();
+        let perfilAtual = null;
+        let chartEvolucao, chartDonut;
+        let questoesAtuais = [];
+        let disciplinaAtual = null;
+
+        // PWA Setup
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW falhou', err));
         }
 
-        function abrirModalIA() { 
-            document.getElementById('ia-disciplina').innerHTML = state.disciplinas.map(d => `<option value="${d.id}">${d.nome}</option>`).join('');
-            abrirModal('modal-ia'); 
+        // --- SISTEMA DE PERFIS ---
+        async function loadPerfisScreen() {
+            try {
+                const res = await fetch(`${API_URL}/api/perfis`);
+                const perfis = await res.json();
+                const container = document.getElementById('perfis-container');
+                
+                // Remove todos menos o botão de "Adicionar"
+                while(container.children.length > 1) { container.removeChild(container.firstChild); }
+                
+                perfis.forEach(p => {
+                    const el = document.createElement('div');
+                    el.className = 'profile-wrapper flex flex-col items-center cursor-pointer';
+                    el.onclick = () => selecionarPerfil(p);
+                    el.innerHTML = `
+                        <div class="profile-card" style="background-color: ${p.cor}">
+                            <i class="${p.avatar}"></i>
+                        </div>
+                        <span class="profile-name">${p.nome}</span>
+                    `;
+                    container.insertBefore(el, container.lastElementChild);
+                });
+            } catch(e) { console.error("Erro carregando perfis", e); }
         }
+
+        function selecionarPerfil(perfil) {
+            perfilAtual = perfil;
+            localStorage.setItem('perfil_id', perfil.id);
+            localStorage.setItem('perfil_obj', JSON.stringify(perfil));
+            
+            document.getElementById('perfil-screen').style.display = 'none';
+            document.getElementById('perfil-nome-atual').innerText = perfil.nome;
+            document.getElementById('perfil-avatar-atual').style.backgroundColor = perfil.cor;
+            document.getElementById('perfil-avatar-atual').innerHTML = `<i class="${perfil.avatar}"></i>`;
+            
+            initApp();
+        }
+
+        async function criarNovoPerfil() {
+            const { value: nome } = await Swal.fire({
+                title: 'Novo Perfil', input: 'text', background: '#111827', color: '#fff',
+                inputPlaceholder: 'Digite seu nome', showCancelButton: true
+            });
+            if (!nome) return;
+
+            const cores = ['#e50914', '#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899'];
+            const avatares = ['ph-user', 'ph-detective', 'ph-ninja', 'ph-robot', 'ph-student'];
+            
+            const cor = cores[Math.floor(Math.random() * cores.length)];
+            const avatar = avatares[Math.floor(Math.random() * avatares.length)];
+
+            await fetch(`${API_URL}/api/perfis`, {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({ nome, cor, avatar })
+            });
+            loadPerfisScreen();
+        }
+
+        function logoutPerfil() {
+            localStorage.removeItem('perfil_id');
+            perfilAtual = null;
+            document.getElementById('perfil-screen').style.display = 'flex';
+            loadPerfisScreen();
+        }
+
+        // --- INICIALIZAÇÃO DO APP ---
+        async function initApp() {
+            await carregarDisciplinas();
+            await carregarEstatisticas();
+            initCharts();
+        }
+
+        window.onload = () => {
+            const salvo = localStorage.getItem('perfil_obj');
+            if (salvo) { selecionarPerfil(JSON.parse(salvo)); } 
+            else { loadPerfisScreen(); }
+        };
+
+        // --- FUNÇÕES DA API E UI ---
+        async function api(path, method = 'GET', body = null) {
+            const options = { method, headers: {'Content-Type':'application/json'} };
+            if (body) options.body = JSON.stringify(body);
+            const res = await fetch(API_URL + path, options);
+            if (!res.ok) throw new Error(await res.text());
+            return res.json();
+        }
+
+        async function carregarDisciplinas() {
+            const list = document.getElementById('lista-materias');
+            const select = document.getElementById('ia-disciplina');
+            list.innerHTML = ''; select.innerHTML = '';
+            
+            const disciplinas = await api('/api/disciplinas');
+            disciplinas.forEach(d => {
+                list.innerHTML += `<li><button onclick="carregarMateria(${d.id}, '${d.nome}')" class="w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">${d.nome}</button></li>`;
+                select.innerHTML += `<option value="${d.id}">${d.nome}</option>`;
+            });
+        }
+
+        async function carregarEstatisticas() {
+            if(!perfilAtual) return;
+            const s = await api(`/api/estatisticas?perfil_id=${perfilAtual.id}`);
+            
+            document.getElementById('stat-total').innerText = s.total;
+            document.getElementById('stat-acertos').innerText = s.acertos;
+            document.getElementById('stat-erros').innerText = s.erros;
+            
+            const taxa = s.total > 0 ? Math.round((s.acertos / s.total) * 100) : 0;
+            document.getElementById('stat-taxa').innerText = `${taxa}%`;
+
+            atualizarGraficos(s, taxa);
+        }
+
+        // --- GERADOR IA AVANÇADO ---
         async function gerarQuestoes() {
             const id = document.getElementById('ia-disciplina').value;
-            fecharModal('modal-ia'); document.getElementById('loading-ia').classList.remove('hidden');
-            await api('/api/gerar', 'POST', { disciplina_id: parseInt(id), quantidade: 10, orgao: document.getElementById('ia-orgao').value, tipo: 'reais' });
-            document.getElementById('loading-ia').classList.add('hidden'); carregarMateria(parseInt(id));
+            fecharModal('modal-ia'); 
+            document.getElementById('loading-ia').classList.remove('hidden');
+            
+            try {
+                await api('/api/gerar', 'POST', { 
+                    disciplina_id: parseInt(id), 
+                    quantidade: parseInt(document.getElementById('ia-quantidade').value), 
+                    origem: document.getElementById('ia-origem').value,
+                    nivel: document.getElementById('ia-nivel').value,
+                    banca: document.getElementById('ia-banca').value,
+                    concurso: document.getElementById('ia-concurso').value,
+                    filtro: document.getElementById('ia-filtro').value
+                });
+                carregarMateria(parseInt(id));
+            } catch (e) {
+                Swal.fire({icon: 'error', title: 'Erro IA', text: e.message, background: '#111827', color: '#fff'});
+            } finally {
+                document.getElementById('loading-ia').classList.add('hidden'); 
+            }
         }
 
-        function abrirModalConfig() { abrirModal('modal-config'); }
-        async function resetarBanco() { if(confirm('Zerar DB?')) { await api('/api/reset_db', 'POST'); initPerfis(); fecharModal('modal-config'); } }
+        // --- RENDERIZAÇÃO E RESOLUÇÃO DE QUESTÕES ---
+        async function carregarMateria(id, nome = null) {
+            if(nome) document.getElementById('titulo-materia').innerText = nome;
+            disciplinaAtual = id;
+            questoesAtuais = await api(`/api/disciplinas/${id}/questoes?perfil_id=${perfilAtual.id}`);
+            renderQuestoes(questoesAtuais);
+        }
 
-        window.onload = initPerfis;
+        function renderQuestoes(lista) {
+            const container = document.getElementById('container-questoes');
+            container.innerHTML = lista.length === 0 ? '<p class="text-slate-500 text-center py-10">Nenhuma questão. Gere algumas com a IA!</p>' : '';
+            
+            lista.forEach((q, index) => {
+                let badge = q.respondida 
+                    ? (q.acertou_ultima ? '<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded text-xs font-bold uppercase">Acertou</span>' : '<span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-1 rounded text-xs font-bold uppercase">Errou</span>')
+                    : '<span class="bg-slate-800 text-slate-400 px-2 py-1 rounded text-xs font-bold uppercase">Nova</span>';
+                
+                let opcoesHtml = q.opcoes.map((opt, i) => `
+                    <button onclick="responder(${q.id}, ${i}, ${q.correta}, this, 'exp-${q.id}')" 
+                            class="w-full text-left p-4 rounded-xl border border-slate-700 bg-[#0f172a] hover:bg-slate-800 hover:border-slate-600 transition-all text-slate-300">
+                        <span class="font-bold text-indigo-400 mr-2">${String.fromCharCode(65+i)})</span> ${opt}
+                    </button>
+                `).join('');
+
+                container.innerHTML += `
+                    <div class="bg-[#111827] border border-slate-800 p-6 rounded-2xl shadow-xl">
+                        <div class="flex items-center gap-3 mb-4">${badge}</div>
+                        <div class="prose prose-invert max-w-none text-slate-200 mb-6 font-medium">${marked.parse(q.enunciado)}</div>
+                        <div class="space-y-3">${opcoesHtml}</div>
+                        <div id="exp-${q.id}" class="hidden mt-6 p-5 bg-slate-900 border border-slate-700 rounded-xl">
+                            <h4 class="text-sm font-bold text-indigo-400 uppercase tracking-widest mb-2 flex items-center gap-2"><i class="ph-fill ph-lightbulb"></i> Explicação do Professor IA</h4>
+                            <div class="prose prose-invert max-w-none text-sm text-slate-300">${marked.parse(q.explicacao)}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function responder(qId, selected, correct, btn, expId) {
+            const acertou = (selected === correct);
+            const parent = btn.parentElement;
+            
+            // Desabilita botões
+            Array.from(parent.children).forEach((b, i) => {
+                b.disabled = true; b.classList.remove('hover:bg-slate-800', 'hover:border-slate-600');
+                if(i === correct) b.className += ' bg-emerald-900/40 border-emerald-500 text-white';
+                else if(i === selected && !acertou) b.className += ' bg-rose-900/40 border-rose-500 text-white';
+                else b.className += ' opacity-50';
+            });
+            
+            document.getElementById(expId).classList.remove('hidden');
+            
+            await api(`/api/questoes/${qId}/responder`, 'POST', { perfil_id: perfilAtual.id, acertou });
+            carregarEstatisticas();
+        }
+
+        function filtrar(tipo) {
+            if(!questoesAtuais) return;
+            if(tipo === 'todas') renderQuestoes(questoesAtuais);
+            if(tipo === 'pendentes') renderQuestoes(questoesAtuais.filter(q => !q.respondida));
+        }
+
+        // --- GRÁFICOS E MODAIS ---
+        function initCharts() {
+            Chart.defaults.color = '#94a3b8'; Chart.defaults.font.family = 'Inter';
+            
+            // Note: maintainAspectRatio: false é necessário para que a div "gaiola" funcione
+            chartEvolucao = new Chart(document.getElementById('graficoEvolucao'), {
+                type: 'line',
+                data: { labels: [], datasets: [{ label: 'Atividade', data: [], borderColor: '#6366f1', backgroundColor: '#6366f120', tension: 0.4, fill: true, pointBackgroundColor: '#818cf8' }] },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#1e293b' } }, x: { grid: { display: false } } } }
+            });
+            
+            chartDonut = new Chart(document.getElementById('graficoDonut'), {
+                type: 'doughnut',
+                data: { labels: ['Acertos', 'Erros'], datasets: [{ data: [0, 0], backgroundColor: ['#10b981', '#f43f5e'], borderWidth: 0, hoverOffset: 4 }] },
+                options: { maintainAspectRatio: false, cutout: '75%', plugins: { legend: { display: false } } }
+            });
+        }
+
+        function atualizarGraficos(s, taxa) {
+            chartDonut.data.datasets[0].data = [s.acertos, s.erros];
+            chartDonut.update();
+            
+            chartEvolucao.data.labels = s.historico.map(h => { const d = new Date(h.dia); return `${d.getDate()}/${d.getMonth()+1}`; });
+            chartEvolucao.data.datasets[0].data = s.historico.map(h => h.total);
+            chartEvolucao.update();
+        }
+
+        function abrirModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function fecharModal(id) { document.getElementById(id).classList.add('hidden'); }
     </script>
 </body>
 </html>
