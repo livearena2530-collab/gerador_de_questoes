@@ -65,7 +65,7 @@
                 <i class="ph-fill ph-student text-3xl"></i>
                 <div>
                     <h1 class="text-xl font-extrabold text-white tracking-tight">ProEstudos</h1>
-                    <span class="text-[10px] uppercase font-bold tracking-widest text-indigo-400">Concursos 4.0</span>
+                    <span class="text-[10px] uppercase font-bold tracking-widest text-indigo-400">CONCURSOS 4.0</span>
                 </div>
             </div>
         </div>
@@ -82,7 +82,7 @@
         
         <div class="p-4 border-t border-slate-800 space-y-3">
             <button onclick="abrirModal('modal-ia')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2">
-                <i class="ph-fill ph-magic-wand"></i> Gerador Avançado
+                <i class="ph-fill ph-magic-wand"></i> Gerar via IA
             </button>
             <button onclick="logoutPerfil()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
                 <i class="ph ph-users"></i> Trocar Perfil
@@ -123,7 +123,7 @@
                     </div>
                 </div>
 
-                <!-- GRÁFICOS (Com correção de altura para evitar loop infinito) -->
+                <!-- GRÁFICOS (Com correção anti-loop do canvas) -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <div class="bg-[#111827] border border-slate-800 p-6 rounded-2xl shadow-xl">
                         <h3 class="text-sm font-bold text-slate-300 flex items-center gap-2 mb-6 uppercase tracking-wider">
@@ -150,13 +150,15 @@
 
                 <!-- ÁREA DE QUESTÕES -->
                 <div class="pt-6">
-                    <div class="flex items-center justify-between mb-6">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                         <h3 class="text-xl font-bold text-white flex items-center gap-2">
-                            <i class="ph-fill ph-stack text-indigo-500"></i> Caderno de Questões
+                            <i class="ph-fill ph-stack text-indigo-500"></i> Últimas Questões
                         </h3>
-                        <div class="flex gap-2 bg-slate-900 p-1 rounded-lg border border-slate-800">
-                            <button onclick="filtrar('todas')" class="px-4 py-1.5 text-sm font-bold rounded-md bg-indigo-600 text-white">Todas</button>
-                            <button onclick="filtrar('pendentes')" class="px-4 py-1.5 text-sm font-bold rounded-md text-slate-400 hover:text-white">Pendentes</button>
+                        <div class="flex flex-wrap gap-2 bg-[#111827] p-1.5 rounded-xl border border-slate-800">
+                            <button onclick="filtrar('todas')" class="px-4 py-2 text-sm font-bold rounded-lg bg-indigo-600 text-white transition-all shadow">Todas</button>
+                            <button onclick="filtrar('pendentes')" class="px-4 py-2 text-sm font-bold rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-all"><i class="ph ph-arrows-clockwise"></i> Pendentes</button>
+                            <button onclick="filtrar('errei')" class="px-4 py-2 text-sm font-bold rounded-lg text-rose-400 hover:bg-rose-900/30 transition-all"><i class="ph ph-x"></i> Errei</button>
+                            <button onclick="filtrar('acertei')" class="px-4 py-2 text-sm font-bold rounded-lg text-emerald-400 hover:bg-emerald-900/30 transition-all"><i class="ph ph-check"></i> Acertei</button>
                         </div>
                     </div>
                     
@@ -173,98 +175,76 @@
         </div>
     </main>
 
-    <!-- MODAL IA AVANÇADO -->
+    <!-- MODAL IA AVANÇADO (Cópia exata da Imagem Solicitada) -->
     <div id="modal-ia" class="fixed inset-0 bg-black/80 hidden z-50 flex items-center justify-center backdrop-blur-sm p-4">
         <div class="bg-[#111827] w-full max-w-md rounded-2xl border border-slate-800 shadow-2xl flex flex-col max-h-[90vh]">
+            
             <div class="p-5 border-b border-slate-800 flex justify-between items-center bg-[#111827] rounded-t-2xl">
                 <h3 class="text-xl font-bold text-white flex items-center gap-2">
-                    <i class="ph-fill ph-magic-wand text-indigo-500"></i> Gerador IA
+                    <i class="ph-fill ph-magic-wand text-indigo-500"></i> Gerador de Questões Avançado
                 </h3>
                 <button onclick="fecharModal('modal-ia')" class="text-slate-400 hover:text-white">
                     <i class="ph ph-x text-xl"></i>
                 </button>
             </div>
             
-            <div class="p-6 space-y-4 overflow-y-auto flex-1 custom-scrollbar">
+            <div class="p-6 space-y-5 overflow-y-auto flex-1 custom-scrollbar">
                 
-                <!-- Tabs -->
-                <div class="flex bg-slate-900 rounded-lg p-1 mb-2">
-                    <button class="flex-1 py-2 text-sm font-bold text-white bg-slate-700 rounded-md shadow">Foco Específico</button>
-                    <button class="flex-1 py-2 text-sm font-bold text-slate-400 hover:text-white cursor-not-allowed" title="Em breve">Simulado Geral</button>
-                </div>
-
-                <!-- Origem -->
+                <!-- Materia -->
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 mb-1">Origem das Questões</label>
-                    <select id="ia-origem" class="w-full bg-[#0f172a] border border-slate-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-indigo-500">
-                        <option value="Questões REAIS (Provas Anteriores)">Questões REAIS (Provas Anteriores)</option>
-                        <option value="Questões INÉDITAS (Estilo Banca)">Questões INÉDITAS (Estilo Banca)</option>
-                    </select>
-                </div>
-
-                <!-- Disciplina -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 mb-1">Disciplina</label>
+                    <label class="block text-sm font-bold text-slate-400 mb-2">Materia / Disciplina</label>
                     <select id="ia-disciplina" class="w-full bg-[#0f172a] border border-slate-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-indigo-500"></select>
                 </div>
 
-                <!-- Nível e Quantidade -->
+                <!-- Estilo -->
+                <div>
+                    <label class="block text-sm font-bold text-slate-400 mb-2">Estilo das Questões</label>
+                    <select id="ia-estilo" class="w-full bg-[#0f172a] border border-slate-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-indigo-500">
+                        <option value="Questões Reais de provas anteriores">Questões Reais (Já cobradas em concursos)</option>
+                        <option value="Questões Inéditas criadas no estilo da banca">Questões Inéditas (Invenções difíceis da IA)</option>
+                    </select>
+                </div>
+
                 <div class="grid grid-cols-2 gap-4">
+                    <!-- Área -->
                     <div>
-                        <label class="block text-xs font-bold text-slate-400 mb-1">Nível</label>
-                        <select id="ia-nivel" class="w-full bg-[#0f172a] border border-slate-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-indigo-500">
-                            <option value="Médio">Médio</option>
-                            <option value="Superior">Superior</option>
+                        <label class="block text-sm font-bold text-slate-400 mb-2">Área do Concurso</label>
+                        <select id="ia-area" class="w-full bg-[#0f172a] border border-slate-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-indigo-500">
+                            <option value="Geral / Sem Filtro">Geral / Sem Filtro</option>
+                            <option value="Carreiras Policiais (PF, PRF, PC)">Carreiras Policiais</option>
+                            <option value="Carreiras Administrativas">Carreiras Administrativas</option>
+                            <option value="Carreiras Bancárias (BB, Caixa)">Carreiras Bancárias</option>
+                            <option value="Tribunais (TJ, TRT, TRE)">Tribunais</option>
+                            <option value="Carreiras Fiscais (Receita)">Carreiras Fiscais</option>
                         </select>
                     </div>
+                    <!-- Banca -->
                     <div>
-                        <label class="block text-xs font-bold text-slate-400 mb-1">Quantidade</label>
-                        <select id="ia-quantidade" class="w-full bg-[#0f172a] border border-slate-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-indigo-500">
-                            <option value="5">5 Questões</option>
-                            <option value="10" selected>10 Questões</option>
-                            <option value="20">20 Questões</option>
+                        <label class="block text-sm font-bold text-slate-400 mb-2">Banca Examinadora</label>
+                        <select id="ia-banca" class="w-full bg-[#0f172a] border border-slate-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-indigo-500">
+                            <option value="Diversas Bancas">Diversas Bancas</option>
+                            <option value="Cebraspe (CESPE)">Cebraspe (CESPE)</option>
+                            <option value="FGV">FGV</option>
+                            <option value="FCC">FCC</option>
+                            <option value="Vunesp">Vunesp</option>
                         </select>
                     </div>
                 </div>
 
-                <!-- Banca -->
+                <!-- Cargo Específico -->
                 <div>
-                    <label class="block text-xs font-bold text-slate-400 mb-1">Banca Específica</label>
-                    <select id="ia-banca" class="w-full bg-[#0f172a] border border-slate-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-indigo-500">
-                        <option value="Qualquer Banca">Qualquer Banca</option>
-                        <option value="Cebraspe (CESPE)">Cebraspe (CESPE)</option>
-                        <option value="FGV">FGV</option>
-                        <option value="FCC">FCC</option>
-                        <option value="Vunesp">Vunesp</option>
-                        <option value="Quadrix">Quadrix</option>
-                    </select>
+                    <label class="block text-sm font-bold text-slate-400 mb-2">Cargo Específico (Opcional)</label>
+                    <input type="text" id="ia-cargo" placeholder="Qualquer Cargo da Área" class="w-full bg-[#0f172a] border border-slate-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-indigo-500 placeholder-slate-600">
                 </div>
-
-                <!-- Concurso -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 mb-1">Qual Concurso? (Órgão / Cargo Alvo)</label>
-                    <select id="ia-concurso" class="w-full bg-[#0f172a] border border-slate-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-indigo-500">
-                        <option value="Qualquer Concurso">Qualquer Concurso (Geral)</option>
-                        <option value="Polícia Federal (PF)">Polícia Federal (PF)</option>
-                        <option value="Polícia Rodoviária Federal (PRF)">Polícia Rodoviária Federal (PRF)</option>
-                        <option value="Tribunais (TJ, TRT, TRE)">Tribunais (TJ, TRT, TRE)</option>
-                        <option value="Carreiras Administrativas">Carreiras Administrativas</option>
-                        <option value="Carreiras Bancárias (BB, Caixa)">Carreiras Bancárias (BB, Caixa)</option>
-                        <option value="Carreiras Policiais (PC, PM)">Carreiras Policiais (PC, PM)</option>
-                    </select>
-                </div>
-
-                <!-- Filtro Cirúrgico -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-400 mb-1">Filtro Cirúrgico (Subtópico)</label>
-                    <input type="text" id="ia-filtro" placeholder="Ex: Habeas Corpus, Crase..." class="w-full bg-[#0f172a] border border-slate-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-indigo-500 placeholder-slate-600">
-                </div>
+                
+                <!-- Quantidade (Oculta mas necessária para a API) -->
+                <input type="hidden" id="ia-quantidade" value="10">
 
             </div>
             
-            <div class="p-5 border-t border-slate-800 bg-[#111827] rounded-b-2xl">
+            <div class="p-5 bg-[#111827] rounded-b-2xl">
                 <button onclick="gerarQuestoes()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-lg shadow-indigo-500/20 flex items-center justify-center gap-2">
-                    <i class="ph-bold ph-check-circle text-xl"></i> Iniciar Busca
+                    Injetar Novas Questões
                 </button>
             </div>
         </div>
@@ -299,19 +279,16 @@
         let questoesAtuais = [];
         let disciplinaAtual = null;
 
-        // PWA Setup
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js').catch(err => console.log('SW falhou', err));
         }
 
-        // --- SISTEMA DE PERFIS ---
         async function loadPerfisScreen() {
             try {
                 const res = await fetch(`${API_URL}/api/perfis`);
                 const perfis = await res.json();
                 const container = document.getElementById('perfis-container');
                 
-                // Remove todos menos o botão de "Adicionar"
                 while(container.children.length > 1) { container.removeChild(container.firstChild); }
                 
                 perfis.forEach(p => {
@@ -351,7 +328,6 @@
 
             const cores = ['#e50914', '#10b981', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899'];
             const avatares = ['ph-user', 'ph-detective', 'ph-ninja', 'ph-robot', 'ph-student'];
-            
             const cor = cores[Math.floor(Math.random() * cores.length)];
             const avatar = avatares[Math.floor(Math.random() * avatares.length)];
 
@@ -369,7 +345,6 @@
             loadPerfisScreen();
         }
 
-        // --- INICIALIZAÇÃO DO APP ---
         async function initApp() {
             await carregarDisciplinas();
             await carregarEstatisticas();
@@ -382,7 +357,6 @@
             else { loadPerfisScreen(); }
         };
 
-        // --- FUNÇÕES DA API E UI ---
         async function api(path, method = 'GET', body = null) {
             const options = { method, headers: {'Content-Type':'application/json'} };
             if (body) options.body = JSON.stringify(body);
@@ -402,6 +376,13 @@
                 select.innerHTML += `<option value="${d.id}">${d.nome}</option>`;
             });
         }
+        
+        async function salvarNovaMateria() {
+            const nome = document.getElementById('nova-disciplina-nome').value;
+            if(!nome) return;
+            // API POST (Supabase não possui rota add via frontend no atual, simulado para fechar modal)
+            fecharModal('modal-disciplina');
+        }
 
         async function carregarEstatisticas() {
             if(!perfilAtual) return;
@@ -417,7 +398,6 @@
             atualizarGraficos(s, taxa);
         }
 
-        // --- GERADOR IA AVANÇADO ---
         async function gerarQuestoes() {
             const id = document.getElementById('ia-disciplina').value;
             fecharModal('modal-ia'); 
@@ -427,11 +407,10 @@
                 await api('/api/gerar', 'POST', { 
                     disciplina_id: parseInt(id), 
                     quantidade: parseInt(document.getElementById('ia-quantidade').value), 
-                    origem: document.getElementById('ia-origem').value,
-                    nivel: document.getElementById('ia-nivel').value,
+                    estilo: document.getElementById('ia-estilo').value,
+                    area: document.getElementById('ia-area').value,
                     banca: document.getElementById('ia-banca').value,
-                    concurso: document.getElementById('ia-concurso').value,
-                    filtro: document.getElementById('ia-filtro').value
+                    cargo: document.getElementById('ia-cargo').value
                 });
                 carregarMateria(parseInt(id));
             } catch (e) {
@@ -441,7 +420,6 @@
             }
         }
 
-        // --- RENDERIZAÇÃO E RESOLUÇÃO DE QUESTÕES ---
         async function carregarMateria(id, nome = null) {
             if(nome) document.getElementById('titulo-materia').innerText = nome;
             disciplinaAtual = id;
@@ -451,11 +429,11 @@
 
         function renderQuestoes(lista) {
             const container = document.getElementById('container-questoes');
-            container.innerHTML = lista.length === 0 ? '<p class="text-slate-500 text-center py-10">Nenhuma questão. Gere algumas com a IA!</p>' : '';
+            container.innerHTML = lista.length === 0 ? '<p class="text-slate-500 text-center py-10">Nenhuma questão encontrada para este filtro.</p>' : '';
             
             lista.forEach((q, index) => {
                 let badge = q.respondida 
-                    ? (q.acertou_ultima ? '<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded text-xs font-bold uppercase">Acertou</span>' : '<span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-1 rounded text-xs font-bold uppercase">Errou</span>')
+                    ? (q.acertou_ultima ? '<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded text-xs font-bold uppercase">Acertei</span>' : '<span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-1 rounded text-xs font-bold uppercase">Errei</span>')
                     : '<span class="bg-slate-800 text-slate-400 px-2 py-1 rounded text-xs font-bold uppercase">Nova</span>';
                 
                 let opcoesHtml = q.opcoes.map((opt, i) => `
@@ -483,7 +461,6 @@
             const acertou = (selected === correct);
             const parent = btn.parentElement;
             
-            // Desabilita botões
             Array.from(parent.children).forEach((b, i) => {
                 b.disabled = true; b.classList.remove('hover:bg-slate-800', 'hover:border-slate-600');
                 if(i === correct) b.className += ' bg-emerald-900/40 border-emerald-500 text-white';
@@ -495,22 +472,23 @@
             
             await api(`/api/questoes/${qId}/responder`, 'POST', { perfil_id: perfilAtual.id, acertou });
             carregarEstatisticas();
+            carregarMateria(disciplinaAtual); // Recarrega os badges para ficarem 'acertei/errei'
         }
 
         function filtrar(tipo) {
             if(!questoesAtuais) return;
             if(tipo === 'todas') renderQuestoes(questoesAtuais);
             if(tipo === 'pendentes') renderQuestoes(questoesAtuais.filter(q => !q.respondida));
+            if(tipo === 'errei') renderQuestoes(questoesAtuais.filter(q => q.respondida && !q.acertou_ultima));
+            if(tipo === 'acertei') renderQuestoes(questoesAtuais.filter(q => q.respondida && q.acertou_ultima));
         }
 
-        // --- GRÁFICOS E MODAIS ---
         function initCharts() {
             Chart.defaults.color = '#94a3b8'; Chart.defaults.font.family = 'Inter';
             
-            // Note: maintainAspectRatio: false é necessário para que a div "gaiola" funcione
             chartEvolucao = new Chart(document.getElementById('graficoEvolucao'), {
                 type: 'line',
-                data: { labels: [], datasets: [{ label: 'Atividade', data: [], borderColor: '#6366f1', backgroundColor: '#6366f120', tension: 0.4, fill: true, pointBackgroundColor: '#818cf8' }] },
+                data: { labels: [], datasets: [{ label: 'Questões', data: [], borderColor: '#6366f1', backgroundColor: '#6366f120', tension: 0.4, fill: true, pointBackgroundColor: '#818cf8' }] },
                 options: { maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { color: '#1e293b' } }, x: { grid: { display: false } } } }
             });
             
